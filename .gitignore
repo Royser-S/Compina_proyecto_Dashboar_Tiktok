@@ -1,0 +1,30 @@
+# ------------------------------------
+# Archivos/Carpetas Ignorados Globalmente
+# ------------------------------------
+
+# Entorno virtual de Python (ES VITAL IGNORAR ESTO)
+venv/
+*.pyc
+
+# Logs y bases de datos locales
+*.log
+*.sqlite
+__pycache__/
+
+# ------------------------------------
+# Archivos Ignorados del FRONTEND (React/Node)
+# ------------------------------------
+
+# Dependencias (LA MÁS IMPORTANTE)
+frontend/node_modules/
+frontend/package-lock.json
+frontend/yarn.lock
+
+# Carpeta de compilación local de Vite/React
+frontend/dist/
+frontend/out/
+
+# Archivos de configuración y caché del editor
+.DS_Store
+.vscode/
+npm-debug.log*

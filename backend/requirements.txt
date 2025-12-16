@@ -1,0 +1,6 @@
+Flask
+Flask-CORS
+pandas
+openpyxl
+requests
+beautifulsoup4
