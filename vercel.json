@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/api/upload",
-      "dest": "backend/app.py"
+      "dest": "/backend/app.py"
     },
     {
       "src": "/",
