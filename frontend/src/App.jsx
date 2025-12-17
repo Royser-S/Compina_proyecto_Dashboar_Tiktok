@@ -2,17 +2,30 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+
 import { 
   CloudArrowUpIcon, UserGroupIcon, CurrencyDollarIcon, 
   ShoppingCartIcon, ArrowPathIcon, PlusIcon, MinusIcon, 
   TrophyIcon, ChartBarIcon, CalendarIcon, FunnelIcon, ChevronUpIcon, ChevronDownIcon,
-  CursorArrowRaysIcon, PresentationChartLineIcon, ArrowUpTrayIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon,
-  EyeIcon // Icono para Vistas
+  CursorArrowRaysIcon, PresentationChartLineIcon, ArrowUpTrayIcon, 
+  ArrowTrendingUpIcon, ArrowTrendingDownIcon, EyeIcon 
 } from "@heroicons/react/24/solid";
 
+// IMPORTA TU IMAGEN DE CAPYBARA
+import capyLogo from './assets/Capy-removebg-preview.png';
+
 const COLORS = ['#FE2C55', '#00C2CB', '#111827', '#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
+
+// --- ICONO DE GITHUB PERSONALIZADO ---
+function GitHubIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+    </svg>
+  );
+}
 
 function App() {
   const [data, setData] = useState(null);
@@ -48,20 +61,17 @@ function App() {
     formData.append('username', '@compipro');
 
     try {
-      // Usamos la ruta relativa para que funcione el Proxy y Vercel
       const response = await axios.post('/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       const responseData = response.data;
       setData(responseData);
 
-      // Auto-seleccionar todos los videos al inicio
       const allVideos = [...new Set(responseData.chart_data.map(item => item.nombre_anuncio))];
       if (selectedVideosChart.length === 0 || selectedVideosChart.length !== allVideos.length) {
          setSelectedVideosChart(allVideos);
       }
       
-      // Auto-seleccionar TODAS las edades al inicio (para vista "general")
       if (responseData.audience_data) {
         const allAges = [...new Set(responseData.audience_data.map(item => item.Edad))].sort();
         setSelectedAges(allAges);
@@ -147,11 +157,8 @@ function App() {
     return aggregated;
   }, [chartData, uniqueVideos, sortConfig]);
 
-  // Agrupamos la data de audiencia para que si hay varias filas con la misma edad, se sumen
   const filteredAudienceData = useMemo(() => {
     const filtered = audienceData.filter(item => selectedAges.includes(item.Edad));
-    
-    // Agrupar por edad (sumar valores si hay duplicados)
     const grouped = filtered.reduce((acc, curr) => {
       const existing = acc.find(i => i.Edad === curr.Edad);
       if (existing) {
@@ -163,8 +170,6 @@ function App() {
       }
       return acc;
     }, []);
-
-    // Ordenar por Edad (asumiendo formato "18-24", "25-34", etc.)
     return grouped.sort((a, b) => a.Edad.localeCompare(b.Edad));
   }, [audienceData, selectedAges]);
 
@@ -184,7 +189,6 @@ function App() {
     setCampaignGroups(groups => groups.map(g => g.id === groupId ? { ...g, selectedVideos: g.selectedVideos.includes(videoName) ? g.selectedVideos.filter(v => v !== videoName) : [...g.selectedVideos, videoName] } : g));
   };
 
-  // --- VISTA INICIAL ---
   if (!data && !loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 font-sans">
@@ -213,6 +217,7 @@ function App() {
         </div>
       )}
 
+      {/* --- AQUÍ ESTÁ EL NAVBAR CON TU GITHUB --- */}
       <nav className="bg-black text-white sticky top-0 z-50 shadow-2xl border-b-4 border-[#00C2CB]">
         <div className="max-w-[1600px] mx-auto px-6 h-20 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -220,11 +225,23 @@ function App() {
             <span className="font-black text-2xl tracking-tight">COMPIPRO <span className="text-[#00C2CB]">ADS</span></span>
           </div>
           <div className="flex items-center gap-6">
+            
             <div className="hidden md:flex items-center gap-3 bg-slate-900 px-5 py-2 rounded-full border border-slate-700">
               <UserGroupIcon className="w-5 h-5 text-[#00C2CB]"/>
               <span className="font-bold">{followers ? followers.toLocaleString() : '0'} Seguidores</span>
             </div>
             
+            {/* --- ENLACE A GITHUB AQUÍ --- */}
+            <a 
+              href="https://github.com/Royser-S" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white hover:text-[#00C2CB] transition-colors"
+              title="Ir a mi GitHub"
+            >
+              <GitHubIcon className="w-8 h-8" />
+            </a>
+
             <input type="file" multiple className="hidden" onChange={handleFileUpload} accept=".xlsx,.csv" ref={fileInputRef}/>
             <button 
               onClick={triggerFileUpload} 
@@ -425,7 +442,6 @@ function App() {
                 <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                     <h3 className="text-xl font-extrabold text-slate-900">Demografía (Edad)</h3>
-                    {/* Botones de filtro por si se quiere ver uno especifico, pero por defecto salen todos */}
                     <div className="flex flex-wrap gap-2">
                       {audienceData.map(d => d.Edad).filter((v, i, a) => a.indexOf(v) === i).sort().map(age => (
                         <button key={age} onClick={() => toggleAgeFilter(age)} className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${selectedAges.includes(age) ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{age}</button>
@@ -433,10 +449,8 @@ function App() {
                     </div>
                   </div>
                   
-                  {/* GRID DE 3 GRÁFICAS GENERALES */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Gráfico 1: VISTAS (IMPRESIONES) - NUEVO */}
                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                       <h4 className="font-bold text-slate-700 mb-4 text-center flex justify-center items-center gap-2">
                         <EyeIcon className="w-5 h-5 text-purple-500"/> Vistas (Impresiones)
@@ -454,7 +468,6 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Gráfico 2: VENTAS (CONVERSIONES) */}
                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                       <h4 className="font-bold text-slate-700 mb-4 text-center flex justify-center items-center gap-2">
                          <ShoppingCartIcon className="w-5 h-5 text-cyan-500"/> Ventas
@@ -472,7 +485,6 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Gráfico 3: GASTO (INVERSIÓN) */}
                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                       <h4 className="font-bold text-slate-700 mb-4 text-center flex justify-center items-center gap-2">
                          <CurrencyDollarIcon className="w-5 h-5 text-red-500"/> Inversión
@@ -497,6 +509,26 @@ function App() {
           </div>
         </div>
       </main>
+
+      <footer className="mt-20 border-t border-slate-200 py-8 bg-white">
+        <div className="max-w-[1600px] mx-auto text-center">
+          <p className="flex items-center justify-center gap-2 font-bold text-slate-700 mb-2">
+            Desarrollado vía 
+            <img src={capyLogo} alt="Capybara Logo" className="w-10 h-10 hover:scale-110 transition-transform cursor-pointer" />
+            por 
+            <a 
+              href="https://github.com/Royser-S" 
+              className="font-black text-slate-900 hover:text-[#00C2CB] transition-colors uppercase tracking-wider"
+            >
+              Royser
+            </a>
+          </p>
+          <p className="text-sm text-slate-400">
+            © {new Date().getFullYear()} Compipro Ads - Todos los derechos reservados
+          </p>
+        </div>
+      </footer>
+
     </div>
   );
 }
