@@ -6,9 +6,10 @@ import {
 } from 'recharts';
 import { 
   CloudArrowUpIcon, UserGroupIcon, CurrencyDollarIcon, 
-  EyeIcon, ShoppingCartIcon, ArrowPathIcon, PlusIcon, MinusIcon, 
-  TrophyIcon, ChartBarIcon, CalendarIcon, FunnelIcon, ChevronUpIcon, ChevronDownIcon, TrashIcon,
-  CursorArrowRaysIcon, PresentationChartLineIcon, ArrowUpTrayIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon
+  ShoppingCartIcon, ArrowPathIcon, PlusIcon, MinusIcon, 
+  TrophyIcon, ChartBarIcon, CalendarIcon, FunnelIcon, ChevronUpIcon, ChevronDownIcon,
+  CursorArrowRaysIcon, PresentationChartLineIcon, ArrowUpTrayIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon,
+  EyeIcon // Icono para Vistas
 } from "@heroicons/react/24/solid";
 
 const COLORS = ['#FE2C55', '#00C2CB', '#111827', '#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
@@ -47,22 +48,23 @@ function App() {
     formData.append('username', '@compipro');
 
     try {
+      // Usamos la ruta relativa para que funcione el Proxy y Vercel
       const response = await axios.post('/api/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       const responseData = response.data;
       setData(responseData);
 
+      // Auto-seleccionar todos los videos al inicio
       const allVideos = [...new Set(responseData.chart_data.map(item => item.nombre_anuncio))];
       if (selectedVideosChart.length === 0 || selectedVideosChart.length !== allVideos.length) {
          setSelectedVideosChart(allVideos);
       }
       
+      // Auto-seleccionar TODAS las edades al inicio (para vista "general")
       if (responseData.audience_data) {
-        const allAges = responseData.audience_data.map(item => item.Edad);
-        if (selectedAges.length === 0 || selectedAges.length !== allAges.length) {
-            setSelectedAges(allAges);
-        }
+        const allAges = [...new Set(responseData.audience_data.map(item => item.Edad))].sort();
+        setSelectedAges(allAges);
       }
     } catch (err) {
       console.error(err);
@@ -145,7 +147,26 @@ function App() {
     return aggregated;
   }, [chartData, uniqueVideos, sortConfig]);
 
-  const filteredAudienceData = useMemo(() => audienceData.filter(item => selectedAges.includes(item.Edad)), [audienceData, selectedAges]);
+  // Agrupamos la data de audiencia para que si hay varias filas con la misma edad, se sumen
+  const filteredAudienceData = useMemo(() => {
+    const filtered = audienceData.filter(item => selectedAges.includes(item.Edad));
+    
+    // Agrupar por edad (sumar valores si hay duplicados)
+    const grouped = filtered.reduce((acc, curr) => {
+      const existing = acc.find(i => i.Edad === curr.Edad);
+      if (existing) {
+        existing.Impresiones += (curr.Impresiones || 0);
+        existing.Conversiones += (curr.Conversiones || 0);
+        existing.Coste += (curr.Coste || 0);
+      } else {
+        acc.push({ ...curr });
+      }
+      return acc;
+    }, []);
+
+    // Ordenar por Edad (asumiendo formato "18-24", "25-34", etc.)
+    return grouped.sort((a, b) => a.Edad.localeCompare(b.Edad));
+  }, [audienceData, selectedAges]);
 
   const moneyFormatter = (number) => `S/ ${Intl.NumberFormat('pe').format(Number(number || 0).toFixed(2))}`;
   const numberFormatter = (number) => Intl.NumberFormat('pe').format(Number(number || 0).toFixed(0));
@@ -163,7 +184,7 @@ function App() {
     setCampaignGroups(groups => groups.map(g => g.id === groupId ? { ...g, selectedVideos: g.selectedVideos.includes(videoName) ? g.selectedVideos.filter(v => v !== videoName) : [...g.selectedVideos, videoName] } : g));
   };
 
-  // --- VISTA 1: PANTALLA DE CARGA INICIAL ---
+  // --- VISTA INICIAL ---
   if (!data && !loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50 font-sans">
@@ -267,9 +288,9 @@ function App() {
                       <p className="text-slate-500 text-sm mt-1">Analiza el rendimiento en el tiempo.</p>
                       
                       <div className="flex gap-2 mt-4 bg-slate-100 p-1 rounded-lg w-fit">
-                         {['conversiones', 'clics', 'gasto', 'impresiones'].map(m => (
+                          {['conversiones', 'clics', 'gasto', 'impresiones'].map(m => (
                             <button key={m} onClick={() => setMetricToChart(m)} className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-all ${metricToChart === m ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>{m}</button>
-                         ))}
+                          ))}
                       </div>
                     </div>
                     
@@ -350,7 +371,7 @@ function App() {
                      <h4 className="font-bold text-slate-800 flex items-center gap-2"><PresentationChartLineIcon className="w-5 h-5 text-indigo-500"/> Evolución Comparada</h4>
                      <div className="flex gap-2 bg-slate-100 p-1 rounded-lg">
                          {['conversiones', 'clics', 'gasto'].map(m => (
-                            <button key={m} onClick={() => setMetricToChart(m)} className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-all ${metricToChart === m ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>{m}</button>
+                           <button key={m} onClick={() => setMetricToChart(m)} className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-all ${metricToChart === m ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>{m}</button>
                          ))}
                       </div>
                    </div>
@@ -404,45 +425,66 @@ function App() {
                 <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                     <h3 className="text-xl font-extrabold text-slate-900">Demografía (Edad)</h3>
+                    {/* Botones de filtro por si se quiere ver uno especifico, pero por defecto salen todos */}
                     <div className="flex flex-wrap gap-2">
-                      {audienceData.map(d => d.Edad).filter((v, i, a) => a.indexOf(v) === i).map(age => (
+                      {audienceData.map(d => d.Edad).filter((v, i, a) => a.indexOf(v) === i).sort().map(age => (
                         <button key={age} onClick={() => toggleAgeFilter(age)} className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${selectedAges.includes(age) ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{age}</button>
                       ))}
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* GRID DE 3 GRÁFICAS GENERALES */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Gráfico 1: GASTO POR EDAD (Barras Horizontales) */}
-                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                      <h4 className="font-bold text-slate-700 mb-4 text-center">💰 Gasto Realizado por Edad</h4>
-                      <div className="h-80 w-full">
+                    {/* Gráfico 1: VISTAS (IMPRESIONES) - NUEVO */}
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                      <h4 className="font-bold text-slate-700 mb-4 text-center flex justify-center items-center gap-2">
+                        <EyeIcon className="w-5 h-5 text-purple-500"/> Vistas (Impresiones)
+                      </h4>
+                      <div className="h-64 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart layout="vertical" data={filteredAudienceData} margin={{ left: 20, right: 30 }}>
-                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={true} />
-                            <XAxis type="number" hide />
-                            <YAxis dataKey="Edad" type="category" width={100} tick={{fontWeight: 'bold'}} />
-                            <Tooltip 
-                                cursor={{fill: 'transparent'}}
-                                formatter={(value) => moneyFormatter(value)}
-                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                            />
-                            <Bar dataKey="Coste" fill="#FE2C55" radius={[0, 8, 8, 0]} barSize={30} />
+                          <BarChart data={filteredAudienceData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="Edad" tick={{fontSize: 12, fontWeight: 'bold'}} />
+                            <YAxis hide />
+                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px' }} formatter={(val) => numberFormatter(val)} />
+                            <Bar dataKey="Impresiones" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
                     </div>
 
-                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                      <h4 className="font-bold text-slate-700 mb-4 text-center">🛒 Ventas (Conversiones) por Edad</h4>
-                      <div className="h-80 w-full">
+                    {/* Gráfico 2: VENTAS (CONVERSIONES) */}
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                      <h4 className="font-bold text-slate-700 mb-4 text-center flex justify-center items-center gap-2">
+                         <ShoppingCartIcon className="w-5 h-5 text-cyan-500"/> Ventas
+                      </h4>
+                      <div className="h-64 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={filteredAudienceData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="Edad" tick={{fontWeight: 'bold'}} />
-                            <YAxis allowDecimals={false} />
-                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: 'none' }}/>
-                            <Bar dataKey="Conversiones" fill="#00C2CB" radius={[8, 8, 0, 0]} barSize={50} />
+                            <XAxis dataKey="Edad" tick={{fontSize: 12, fontWeight: 'bold'}} />
+                            <YAxis hide />
+                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px' }} />
+                            <Bar dataKey="Conversiones" fill="#00C2CB" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    {/* Gráfico 3: GASTO (INVERSIÓN) */}
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                      <h4 className="font-bold text-slate-700 mb-4 text-center flex justify-center items-center gap-2">
+                         <CurrencyDollarIcon className="w-5 h-5 text-red-500"/> Inversión
+                      </h4>
+                      <div className="h-64 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={filteredAudienceData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="Edad" tick={{fontSize: 12, fontWeight: 'bold'}} />
+                            <YAxis hide />
+                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px' }} formatter={(val) => moneyFormatter(val)}/>
+                            <Bar dataKey="Coste" fill="#FE2C55" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
