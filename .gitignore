@@ -1,30 +1,60 @@
 # ------------------------------------
-# Archivos/Carpetas Ignorados Globalmente
+# SEGURIDAD (¡MUY IMPORTANTE!)
 # ------------------------------------
+.env
+.env.local
+.env.*.local
 
-# Entorno virtual de Python (ES VITAL IGNORAR ESTO)
+# ------------------------------------
+# PYTHON / BACKEND
+# ------------------------------------
+# Entornos virtuales (posibles nombres)
 venv/
+env/
+api/venv/
+
+# Archivos compilados y cache de Python
 *.pyc
-
-# Logs y bases de datos locales
-*.log
-*.sqlite
 __pycache__/
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Base de datos local (si usas SQLite)
+*.sqlite
+*.sqlite3
+db.sqlite3
+
+# Archivos de datos (Reportes Excel/CSV que descargas)
+# Esto evita subir datos de clientes al repositorio
+*.xlsx
+*.xls
+*.csv
 
 # ------------------------------------
-# Archivos Ignorados del FRONTEND (React/Node)
+# FRONTEND (React/Vite)
 # ------------------------------------
-
-# Dependencias (LA MÁS IMPORTANTE)
 frontend/node_modules/
-frontend/package-lock.json
-frontend/yarn.lock
+node_modules/
 
-# Carpeta de compilación local de Vite/React
+# Archivos de construcción (Build)
 frontend/dist/
+frontend/build/
 frontend/out/
 
-# Archivos de configuración y caché del editor
+# Cache y logs
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# NOTA: He eliminado 'package-lock.json' de aquí. 
+# DEBES subirlo para que Vercel funcione correctamente.
+
+# ------------------------------------
+# SISTEMA / IDE
+# ------------------------------------
 .DS_Store
 .vscode/
-npm-debug.log*
+.idea/
+Thumbs.db
