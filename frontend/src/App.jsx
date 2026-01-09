@@ -120,8 +120,8 @@ function App() {
         {/* SELECTOR DE CARPETAS Y ELIMINAR */}
 {/* --- AQUÍ ESTÁ EL CAMBIO "CHEVERE" --- */}
         {data && (
-            <div className="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 gap-4">
-                
+<div className="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-8 bg-white p-3 rounded-2xl shadow-sm border border-slate-200 w-full md:w-fit gap-4">                
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                 {/* Usamos el nuevo componente */}
                 <CampaignSelector 
                     campaigns={campaigns}
@@ -129,12 +129,19 @@ function App() {
                     onSelect={(val) => setSelectedCampaign(val)}
                     onDelete={handleDeleteCampaign}
                 />
-
-                {/* Si quieres poner algo más a la derecha, como un resumen rápido */}
-                <div className="text-right hidden md:block">
-                    <p className="text-xs text-slate-400 font-bold uppercase">Última actualización</p>
-                    <p className="text-sm font-bold text-slate-700">{new Date().toLocaleDateString()}</p>
                 </div>
+
+{/* BOTÓN ELIMINAR: Ancho completo en móvil */}
+                {selectedCampaign !== 'Todas' && (
+                    <button 
+                        onClick={handleDeleteCampaign}
+                        className="w-full md:w-auto flex justify-center items-center gap-2 p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                        title="Eliminar esta carpeta"
+                    >
+                        <span className="md:hidden font-bold text-xs text-red-500">Eliminar Carpeta</span>
+                        <TrashIcon className="w-5 h-5" />
+                    </button>
+                )}
             </div>
         )}
 

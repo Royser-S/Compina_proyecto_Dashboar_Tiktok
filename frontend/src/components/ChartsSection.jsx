@@ -258,8 +258,7 @@ export default function ChartsSection({ chartData = [], fullChartData = [], audi
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mt-8">
-        <div className="flex border-b border-slate-100 p-2 bg-slate-50 overflow-x-auto">
-            <TabButton active={activeTab === 'evolucion'} onClick={() => setActiveTab('evolucion')} icon={<ChartBarIcon className="w-5 h-5"/>}>Evolución & Tabla</TabButton>
+<div className="flex border-b border-slate-100 p-2 bg-slate-50 overflow-x-auto whitespace-nowrap custom-scrollbar">            <TabButton active={activeTab === 'evolucion'} onClick={() => setActiveTab('evolucion')} icon={<ChartBarIcon className="w-5 h-5"/>}>Evolución & Tabla</TabButton>
             <TabButton active={activeTab === 'comparador'} onClick={() => setActiveTab('comparador')} icon={<TrophyIcon className="w-5 h-5"/>}>Comparador Versus</TabButton>
             <TabButton active={activeTab === 'audiencia'} onClick={() => setActiveTab('audiencia')} icon={<UserGroupIcon className="w-5 h-5"/>}>Audiencia (Edad)</TabButton>
         </div>
@@ -281,8 +280,8 @@ export default function ChartsSection({ chartData = [], fullChartData = [], audi
                       </div>
                     </div>
                     
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 w-full xl:max-w-2xl">
-                      <div className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><FunnelIcon className="w-3 h-3"/> Filtrar Videos (De la carpeta actual):</div>
+<div className="bg-slate-50 p-3 rounded-xl border border-slate-200 w-full">                      
+    <div className="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1"><FunnelIcon className="w-3 h-3"/> Filtrar Videos (De la carpeta actual):</div>
                       <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar">
                         {uniqueVideos.map((video, idx) => (
                           <button key={video} onClick={() => toggleVideoFilter(video)} className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all border ${selectedVideosChart.includes(video) ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}>
@@ -292,7 +291,7 @@ export default function ChartsSection({ chartData = [], fullChartData = [], audi
                       </div>
                     </div>
                   </div>
-                  <div className="h-[400px] w-full">
+                  <div className="h-[300px] md:h-[400px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={evolutionChartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -312,8 +311,8 @@ export default function ChartsSection({ chartData = [], fullChartData = [], audi
                 {/* TABLA ... */}
                 <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                   <div className="p-6 border-b border-slate-100 bg-slate-50"><h3 className="text-xl font-extrabold text-slate-900">📊 Tabla Detallada</h3></div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
+                  <div className="overflow-x-auto custom-scrollbar">
+                    <table className="w-full text-sm text-left min-w-[600px]">
                       <thead className="bg-white text-slate-500 uppercase font-bold text-xs border-b border-slate-200">
                         <tr>
                           <th className="p-4">Video</th>
@@ -369,7 +368,7 @@ export default function ChartsSection({ chartData = [], fullChartData = [], audi
                          ))}
                       </div>
                    </div>
-                   <div className="h-[300px] w-full">
+                   <div className="h-[300px] md:h-[400px] w-full">
                      <ResponsiveContainer width="100%" height="100%">
                        <AreaChart data={comparisonChartData}>
                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
