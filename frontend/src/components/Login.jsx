@@ -12,8 +12,10 @@ export default function Login({ onLogin }) {
     setLoading(true);
     setError(false);
 
-    try {
-        const response = await fetch('http://localhost:5000/api/login', {
+
+try {
+        // CAMBIO AQUÍ: Usamos solo '/api/login' sin el dominio
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password })

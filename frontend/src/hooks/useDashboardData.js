@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 // Configurar axios para que sepa a dónde apuntar (opcional, pero buena práctica)
-axios.defaults.baseURL = 'http://localhost:5000'; 
+//axios.defaults.baseURL = 'http://localhost:5000'; 
 
 export function useDashboardData() {
   const [data, setData] = useState(null);
